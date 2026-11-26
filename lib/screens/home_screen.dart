@@ -12,6 +12,8 @@ class _HomeScreenState extends State<HomeScreen> {
   final _titleController = TextEditingController();
 final _amountController = TextEditingController();
 
+final List<String> _categories = ['Food', 'Transport', 'Bills', 'Others'];
+
   final List<Expense> _expenses = [
     Expense(
       id: '1',
@@ -32,9 +34,11 @@ final _amountController = TextEditingController();
   double get _total => _expenses.fold(0, (sum, e) => sum + e.amount);
 
   void _showAddDialog() {
+    String selectedCategory = 'Food';
     showDialog(
       context: context,
-      builder:(context) => AlertDialog(
+      builder:(context) => StatefulBuilder(
+      builder:(context, setDialogState) => AlertDialog(
         title: const Text('Add Expense'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -49,6 +53,17 @@ final _amountController = TextEditingController();
               keyboardType: TextInputType.number,
               decoration: const InputDecoration( labelText: 'Amount (₦)'),
             ),
+           const SizedBox(height: 12),
+DropdownButtonFormField<String>(
+  initialValue: selectedCategory,
+  decoration: const InputDecoration(labelText: 'Category'),
+  items: _categories.map((cat) {
+    return DropdownMenuItem(value: cat, child: Text(cat));
+  }).toList(),
+  onChanged: (val) =>
+      setDialogState(() => selectedCategory = val!),
+
+             ),
           ],
         ),
         actions: [
@@ -73,15 +88,15 @@ final _amountController = TextEditingController();
                 _titleController.clear();
                 _amountController.clear();
                 Navigator.pop(context);
-              }
+             }
            },
            child: const Text('Add'),
+           
           ),
         ],
       ),
-      
+     ),
     );
-
   }
 
   @override
