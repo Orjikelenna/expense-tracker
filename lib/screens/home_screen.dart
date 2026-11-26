@@ -9,6 +9,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final _titleController = TextEditingController();
+final _amountController = TextEditingController();
+
   final List<Expense> _expenses = [
     Expense(
       id: '1',
@@ -27,6 +30,59 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   double get _total => _expenses.fold(0, (sum, e) => sum + e.amount);
+
+  void _showAddDialog() {
+    showDialog(
+      context: context,
+      builder:(context) => AlertDialog(
+        title: const Text('Add Expense'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children:[
+            TextField(
+              controller: _titleController,
+            decoration: const InputDecoration(labelText: 'Title'),
+             
+            ),
+            TextField(
+              controller: _amountController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration( labelText: 'Amount (₦)'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancle'),
+
+          ),
+          ElevatedButton(onPressed: () {
+              final title = _titleController.text;
+              final amount = double.tryParse(_amountController.text);
+              if (title.isNotEmpty && amount != null) {
+                setState(() {
+                  _expenses.add(Expense(
+                    id: DateTime.now().toString(),
+                    title: title,
+                    amount: amount,
+                    category: 'Other',
+                    date: DateTime.now(),
+                  ));
+                });
+                _titleController.clear();
+                _amountController.clear();
+                Navigator.pop(context);
+              }
+           },
+           child: const Text('Add'),
+          ),
+        ],
+      ),
+      
+    );
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
+
           Expanded(
             child: ListView.builder(
               itemCount: _expenses.length,
@@ -75,6 +132,10 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton( 
+      onPressed: _showAddDialog,
+      child: const Icon(Icons.add),
       ),
     );
   }
