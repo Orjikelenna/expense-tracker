@@ -31,10 +31,19 @@ final List<String> _categories = ['Food', 'Transport', 'Bills', 'Others'];
     ),
   ];
 
-  double get _total => _expenses.fold(0, (sum, e) => sum + e.amount);
+   double get _totalIncome => _expenses
+      .where((e) => e.type == 'Income')
+      .fold(0, (sum, e) => sum + e.amount);
+
+  double get _totalExpenses => _expenses
+      .where((e) => e.type == 'Expense')
+      .fold(0, (sum, e) => sum + e.amount);
+
+  double get _balance => _totalIncome - _totalExpenses;
 
   void _showAddDialog() {
     String selectedCategory = 'Food';
+    String selectedType = 'Expense';
     showDialog(
       context: context,
       builder:(context) => StatefulBuilder(
@@ -56,20 +65,51 @@ final List<String> _categories = ['Food', 'Transport', 'Bills', 'Others'];
            const SizedBox(height: 12),
 DropdownButtonFormField<String>(
   initialValue: selectedCategory,
-  decoration: const InputDecoration(labelText: 'Category'),
-  items: _categories.map((cat) {
-    return DropdownMenuItem(value: cat, child: Text(cat));
-  }).toList(),
-  onChanged: (val) =>
-      setDialogState(() => selectedCategory = val!),
+  decoration: const InputDecoration(
+    labelText: 'Category'
+  ),
 
+  items: _categories.map((cat ) {
+    return DropdownMenuItem(
+      value: cat,
+       child: Text(cat));
+  }).toList(),
+  onChanged: (value) {
+    if (value != null){
+      setDialogState((){
+        selectedCategory = value;
+      });
+    }
+  },
+     // setDialogState(() => selectedCategory = val!)
+             ),
+
+             const SizedBox(height: 12),
+             DropdownButtonFormField(
+             initialValue: selectedType,
+             decoration: const InputDecoration(
+              labelText: 'Transaction Type',
+             ),
+             items: ['Expense', 'Income'].map((type) {
+                return DropdownMenuItem(
+                  value: type,
+                  child: Text(type),
+                );
+             }).toList(),
+             onChanged: (value) {
+              if (value != null) {
+                setDialogState((){
+                  selectedType = value;
+                });
+               }
+              },
              ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancle'),
+            child: const Text('Cancel'),
 
           ),
           ElevatedButton(onPressed: () {
@@ -81,7 +121,8 @@ DropdownButtonFormField<String>(
                     id: DateTime.now().toString(),
                     title: title,
                     amount: amount,
-                    category: 'Other',
+                    category: selectedCategory,
+                    type: selectedType,
                     date: DateTime.now(),
                   ));
                 });
@@ -111,12 +152,13 @@ DropdownButtonFormField<String>(
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(20),
+            //color:Colors.green,
             color: Theme.of(context).colorScheme.primaryContainer,
             child: Column(
               children: [
-                const Text('Total Spent'),
+                const Text('Balance'),
                 Text(
-                  '₦${_total.toStringAsFixed(2)}',
+                  '₦${_balance.toStringAsFixed(2)}',
                   style: const TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
@@ -148,6 +190,7 @@ DropdownButtonFormField<String>(
           ),
         ],
       ),
+    
       floatingActionButton: FloatingActionButton( 
       onPressed: _showAddDialog,
       child: const Icon(Icons.add),
